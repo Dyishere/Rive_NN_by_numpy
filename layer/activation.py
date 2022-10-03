@@ -9,16 +9,36 @@ import numpy as np
 
 class softmax:
     def __init__(self, input_shape, axis):
+        self.out = None
         self.input_shape = input_shape
         self.axis = axis
 
     def forward(self, input_tensor):
-        # input_tensor -= np.max(input_tensor, axis=self.axis)
-        return np.exp(input_tensor) / np.sum(np.exp(input_tensor))
+        print(input_tensor.shape)
+        if len(input_tensor.shape) == 4:
+            max = np.zeros(input_tensor.shape)
+            for i in range(max.shape[self.axis]):
+                max[:, i, :, :] = np.max(input_tensor, axis=self.axis)
+            input_tensor -= max
+            return np.exp(input_tensor) / np.sum(np.exp(input_tensor))
+        elif len(input_tensor.shape) == 3:
+            max = np.zeros(input_tensor.shape)
+            for i in range(max.shape[self.axis]):
+                max[:, i, :] = np.max(input_tensor, axis=self.axis)
+            input_tensor -= max
+            self.out = np.exp(input_tensor) / np.sum(np.exp(input_tensor))
+            return self.out
+        else:
+            print("Softmax 输入维度不支持！")
+            return
 
     def gradient(self, d_out):
-        d_out = d_out.reshape(self.input_shape)
-        return d_out
+        dx = self.out * d_out
+        sumdx = np.sum(dx, axis=1, keepdims=True)
+        dx -= self.out*sumdx
+        # d_out = d_out.reshape(self.input_shape[:-1])
+        # d_out = np.broadcast_to(d_out, shape=self.input_shape)
+        return dx
 
 
 class Relu:
@@ -46,6 +66,8 @@ if __name__ == '__main__':
     # print("Y:", Y)
     # print("g:", g)
 
-    x = np.random.random((5, 256, 64, 64))
-    y = softmax(x, axis=1)
-    print(y.shape)
+    x = np.array(
+        [0, 1, 2, 3, 4, 5]
+    )
+    y = softmax(x.shape, axis=0).forward(x)
+    print(np.max(y))

@@ -55,10 +55,11 @@ class RPN:
         self.bbox_shape = bbox.shape
         bbox = bbox.reshape((bbox.shape[0], -1, 4))
 
+        # prob是cls的softmax版本
         return cls, prob, bbox
 
     def backpropagation(self, d_out):
-        cls_loss, prob_loss, bbox_loss = d_out[0], d_out[1], d_out[2]
+        prob_loss, bbox_loss = d_out[0], d_out[1]
         bbox_loss = bbox_loss.reshape(self.bbox_shape)
         bbox_loss = self.conv_rec.gradient(bbox_loss)
         self.conv_rec.backward()

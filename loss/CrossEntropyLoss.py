@@ -24,7 +24,7 @@ class CrossEntropyLoss:
         self.loss = 0
         for i in range(self.batch_size):
             self.loss += -np.log(self.soft_X[i, int(y[i])]) / self.batch_size
-            return self.loss
+        return self.loss
 
     def softmax(self, X):
         self.X = X
